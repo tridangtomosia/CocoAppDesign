@@ -29,18 +29,23 @@ func + (left: NSAttributedString, right: NSAttributedString) -> NSAttributedStri
 
 class APIPath {
     #if DEV
-        static let endpoint = "http://4480e126ac0b.ngrok.io"
+        static let endpoint = "http://coco-backend-dev.ap-northeast-1.elasticbeanstalk.com"
     #elseif STG
         static let endpoint = ""
     #else
-        static let endpoint = "http://4480e126ac0b.ngrok.io"
+        static let endpoint = "http://coco-backend-dev.ap-northeast-1.elasticbeanstalk.com"
     #endif
 
     enum Version: String {
         case v1
+        case policy = "privacy-policy"
 
         var path: String {
             return APIPath.endpoint / "api" / rawValue
+        }
+        
+        var link: String {
+            return APIPath.endpoint / rawValue
         }
     }
 
@@ -53,15 +58,15 @@ class APIPath {
     }
 
     struct Categories {
-        static var login: String { Version.v1.path / "login" }
+        static var categories: String { Version.v1.path / "categories" }
     }
 
     struct MasterCategories {
-        static var MasterCategories: String { Version.v1.path / "Master-categories" }
+        static var MasterCategories: String { Version.v1.path / "master-category"}
     }
 
     struct Shop {
-        static var shop: String { Version.v1.path / "shop" }
+        static var shopDetail: String { Version.v1.path / "shop" }
     }
 }
 
@@ -69,7 +74,8 @@ enum APIURLRequest {
     case phone
     case login
     case categories
-    case masterCategories
+    case masterCategories(Int)
+    case shopDetail(Int)
     
     var url: URL {
         switch self {
@@ -78,6 +84,7 @@ enum APIURLRequest {
                 break
             }
             return url
+            
         case .login:
             guard let url = URL(string: APIPath.Login.login) else {
                 break
@@ -85,12 +92,18 @@ enum APIURLRequest {
             return url
             
         case .categories:
-            guard let url = URL(string: APIPath.Categories.login) else {
+            guard let url = URL(string: APIPath.Categories.categories) else {
                 break
             }
             return url
-        case .masterCategories:
-            guard let url = URL(string: APIPath.MasterCategories.MasterCategories) else {
+            
+        case let .masterCategories(id):
+            guard let url = URL(string: APIPath.MasterCategories.MasterCategories / "\(id)" / "shops") else {
+                break
+            }
+            return url
+        case let .shopDetail(id):
+            guard let url = URL(string: APIPath.Shop.shopDetail / "\(id)") else {
                 break
             }
             return url
